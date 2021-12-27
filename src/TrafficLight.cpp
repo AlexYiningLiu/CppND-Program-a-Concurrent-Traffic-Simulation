@@ -32,6 +32,8 @@ void MessageQueue<T>::send(T &&msg)
 
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
+    // flush out the message queue
+    _queue.clear();
     // add vector to queue
     _queue.push_back(std::move(msg));
     // notify client after pushing new Vehicle into vector
@@ -91,21 +93,21 @@ void TrafficLight::cycleThroughPhases()
     double timeSinceLastUpdate;
 
     // generate the cycle duration randomly
-    cycleDuration = distr(eng);
+    cycleDuration = distr(eng) * 1000;
     while (true)
     {
         // sleep at every iteration to reduce CPU usage
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         // compute time difference to stop watch
-        timeSinceLastUpdate = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - lastUpdate).count();
+        timeSinceLastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastUpdate).count();
         if (timeSinceLastUpdate >= cycleDuration)
         {
             // reset stop watch for next cycle
             lastUpdate = std::chrono::system_clock::now();
 
             // regenerate the cycle duration
-            cycleDuration = distr(eng);
+            cycleDuration = distr(eng) * 1000;
 
             // toggle the current phase between red and green
             _currentPhase = (_currentPhase == red) ? green : red;
