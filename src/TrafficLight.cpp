@@ -28,7 +28,7 @@ void MessageQueue<T>::send(T &&msg)
     // flush out the message queue
     _queue.clear();
     // add vector to queue
-    _queue.push_back(std::move(msg));
+    _queue.emplace_back(std::move(msg));
     // notify client after pushing new Vehicle into vector
     _cond.notify_one();
 }
@@ -46,7 +46,6 @@ void TrafficLight::waitForGreen()
     // hence we need to protect _queue using mutex, because send is called by the thread that runs cycleThroughPhases
     while (true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         if (_messageQueue.receive() == green)
         {
             return;
